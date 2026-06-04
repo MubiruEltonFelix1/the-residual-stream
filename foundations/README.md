@@ -1,7 +1,7 @@
 <div align="center">
 
-<!-- HEADER -->
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0f0c29,50:302b63,100:24243e&height=180&section=header&text=Foundations&fontSize=44&fontColor=ffffff&fontAlignY=38&desc=mathematical%20bedrock%20for%20building%20ML%20from%20first%20principles&descAlignY=58&descSize=16&animation=fadeIn" width="100%"/>
+<!-- HEADER BANNER -->
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0f0c29,50:302b63,100:24243e&height=200&section=header&text=foundations&fontSize=42&fontColor=ffffff&fontAlignY=38&desc=mathematical%20bedrock%20for%20building%20ML%20from%20first%20principles&descAlignY=58&descSize=16&animation=fadeIn" width="100%"/>
 
 </div>
 
@@ -9,17 +9,17 @@
 
 ## The Setup
 
-Before I can build transformers, optimizers, or training loops, I need the math to stop being ceremonial.
+Before the code gets interesting, the math has to be real.
 
-This folder is where I work through the pieces that sit underneath the rest of the repo: linear algebra, calculus, and probability. The goal is not to memorize definitions. The goal is to be able to derive, implement, and debug the ideas when they show up inside a real model.
+This folder is where I rebuild the pieces that sit underneath the rest of the repo: linear algebra, calculus, and probability. The goal is not to memorize definitions. The goal is to derive the ideas, implement them, and debug them when they show up inside a real model.
 
-If something breaks later in `implementations/`, this is where I come back to check whether the intuition was actually sound.
+If something breaks later in the implementation folders, this is where I come back to check whether the intuition was actually sound.
 
 ---
 
 <div align="center">
 
-## What Lives Here
+## What's Being Built
 
 </div>
 
@@ -33,23 +33,9 @@ foundations/
 
 ---
 
-## Why This Exists
-
-I do not want to treat the math as decoration around machine learning.
-
-When I understand the foundations properly, the rest of the repo becomes easier to reason about:
-
-- Linear algebra explains how attention and embeddings move information around.
-- Calculus explains how gradients actually flow through a computation graph.
-- Probability explains loss functions, uncertainty, and why optimization objectives look the way they do.
-
-The point is to make these ideas operational, not just familiar.
-
----
-
 <div align="center">
 
-## Working Rule
+## The Principles
 
 </div>
 
@@ -60,26 +46,10 @@ If I cannot derive the result on paper, I do not really understand it yet.
 Small numerical examples should match the theory before I trust a bigger system.
 
 **Connect it back to code.**  
-Every theorem or identity should eventually point at something I will use in JAX.
+Every identity should eventually point at something I will use in JAX.
 
 **Keep the examples small.**  
 Tiny matrices and simple distributions reveal mistakes faster than ambitious notation.
-
----
-
-<div align="center">
-
-## What I Want To Be Able To Do
-
-</div>
-
-| Skill | Why it matters |
-|-------|----------------|
-| Multiply, reshape, and decompose matrices cleanly | Most model internals are matrix operations in disguise |
-| Derive gradients by hand | Backprop only makes sense when the chain rule is concrete |
-| Recognize stable vs unstable numerical formulas | Training fails for numerical reasons before it fails conceptually |
-| Reason about probabilities and expectations | Losses, sampling, and evaluation all depend on this |
-| Translate math into JAX code | The real test is whether the derivation survives implementation |
 
 ---
 
@@ -103,30 +73,32 @@ Tiny matrices and simple distributions reveal mistakes faster than ambitious not
 
 ---
 
-## How I Use This Folder
+## Why It Matters
 
-I keep the work in this folder close to the reasoning:
+The point is to make these ideas operational, not just familiar.
+
+- Linear algebra explains how attention and embeddings move information around.
+- Calculus explains how gradients flow through a computation graph.
+- Probability explains loss functions, uncertainty, and optimization objectives.
+
+---
+
+## Working Style
 
 - Short derivations before long implementations.
 - Small examples before full tensor shapes.
 - Notes on what confused me, not just what worked.
 - Connections back to the code I will write later.
 
-If the math stays abstract, it does not stay useful.
-
 ---
 
 ## Next Steps
-
-The immediate goal is simple:
 
 1. Build a clean linear algebra refresher.
 2. Work through backprop by hand until it feels mechanical.
 3. Keep enough probability theory in view to make loss functions and objectives feel natural.
 
 Once those are solid, the implementation folders should move faster and break more cleanly.
-
----
 
 <sub>
 Part of the same build log as the root project. The difference is that this folder starts with the math instead of the model.
