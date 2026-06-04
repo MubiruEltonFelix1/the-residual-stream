@@ -48,6 +48,12 @@ This is the residual stream. Every week, the weights update.
 ```
 the-residual-stream/
 │
+├── lectures_exercises/       Lecture notes and JAX challenge work
+│   ├── lectures/             Course lecture material
+│   └── exercises/            Notebook-based practice and challenges
+│
+├── research_papers/          Paper PDFs and primary reading material
+│
 ├── 🧮  foundations/          Mathematical bedrock. No ML yet.
 │   ├── linear_algebra/       SVD, eigendecomposition, projections
 │   ├── calculus/             Jacobians, backprop by hand, chain rule
@@ -61,15 +67,13 @@ the-residual-stream/
 │   └── 05_chinchilla_laws/   The scaling calculator that broke GPT-3
 │
 ├── 📄  paper_notes/          Structured notes on every paper read
-│   ├── template.md           The format used for every paper
-│   └── [paper].md            Claim · Key experiment · What I'd test next
 │
 ├── 🔬  experiments/          Original questions. Stated hypotheses. Real results.
 │   ├── 01_tokenization_tax/  Does Luganda really cost 3× more tokens?
 │   └── 02_warmup_ablation/   How bad is training without LR warmup?
 │
 ├── 📓  weekly_builds/        One complete, working thing per week
-│
+
 └── 📋  LEARNING_LOG.md       Honest weekly updates. What broke. What I don't know yet.
 ```
 
