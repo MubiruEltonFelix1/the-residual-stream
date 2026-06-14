@@ -94,7 +94,9 @@ ax.set_xlim(-0.1, 1.2)
 ax.set_ylim(-0.1, 1.2)
 ax.set_zlim(-0.1, 1.2)
 ax.legend(loc='upper left', fontsize=11)
-plt.show()
+# Save instead of show (headless environment)
+plt.savefig('C:/Users/Administrator/Desktop/the-residual-stream/scratch/attention_trajectory.png', dpi=150, bbox_inches='tight')
+plt.close()
 
 # Print mathematical validation straight to console
 print("\n=== GEOMETRIC VERIFICATION ===")
