@@ -1,1 +1,3 @@
 /.venv
+# Bwat per-workspace permission allowlist
+.bwat/

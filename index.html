@@ -201,9 +201,10 @@
     .hero {
       position: relative;
       min-height: calc(100vh - var(--nav-height));
+      height: calc(100vh - var(--nav-height));
       display: flex;
       align-items: center;
-      padding: 80px 0;
+      padding: 0;
       overflow: hidden;
     }
 
@@ -234,33 +235,50 @@
       position: relative;
       z-index: 1;
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 60px;
+      grid-template-columns: 1.4fr 0.6fr;
+      gap: 48px;
       align-items: center;
+      width: 100%;
+    }
+
+    .hero-left {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 32px 0;
+    }
+
+    .hero-right {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
     }
 
     @media (max-width: 860px) {
-      .hero-content { grid-template-columns: 1fr; gap: 40px; }
-      .hero-visual { display: none; }
+      .hero-content { grid-template-columns: 1fr; gap: 32px; }
+      .hero-right { display: none; }
+      .hero-left { padding: 32px 0; }
     }
 
     .hero-badge {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       font-family: var(--font-display);
-      font-size: 0.7rem;
-      letter-spacing: 0.15em;
+      font-size: 0.6rem;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      padding: 6px 14px 6px 10px;
+      padding: 3px 8px;
       border: 1px solid var(--border);
       border-radius: 100px;
       color: var(--text-dim);
-      margin-bottom: 28px;
+      margin-bottom: 14px;
     }
 
     .hero-badge .dot {
-      width: 8px; height: 8px;
+      width: 5px; height: 5px;
       border-radius: 50%;
       background: var(--green);
       animation: pulse-dot 2s ease-in-out infinite;
@@ -273,11 +291,11 @@
 
     .hero h1 {
       font-family: var(--font-display);
-      font-size: clamp(2rem, 5vw, 3.6rem);
+      font-size: clamp(1.5rem, 3.2vw, 2.4rem);
       font-weight: 700;
-      line-height: 1.08;
+      line-height: 1.1;
       letter-spacing: -0.02em;
-      margin-bottom: 20px;
+      margin-bottom: 12px;
     }
 
     .hero h1 .gradient {
@@ -290,10 +308,10 @@
     .hero h1 .amp { font-style: italic; opacity: 0.7; }
 
     .hero-sub {
-      font-size: clamp(0.95rem, 1.3vw, 1.1rem);
+      font-size: clamp(0.85rem, 1.1vw, 0.95rem);
       color: var(--text-dim);
-      line-height: 1.7;
-      margin-bottom: 36px;
+      line-height: 1.6;
+      margin-bottom: 20px;
     }
 
     .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
@@ -332,15 +350,15 @@
 
     .hero-visual img {
       width: 100%;
-      max-width: 460px;
+      max-width: 200px;
       border-radius: var(--radius);
       border: 1px solid var(--border);
-      box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.4);
     }
 
     .hero-visual-caption {
       position: absolute;
-      bottom: 12px;
+      bottom: 10px;
       left: 12px;
       right: 12px;
       font-family: var(--font-display);
@@ -356,15 +374,15 @@
     .hero-meta {
       display: flex;
       flex-wrap: wrap;
-      gap: 32px;
-      margin-top: 48px;
-      padding-top: 28px;
+      gap: 16px;
+      margin-top: 20px;
+      padding-top: 16px;
       border-top: 1px solid var(--border);
     }
 
-    .hero-meta-item { display: flex; flex-direction: column; gap: 4px; }
-    .hero-meta-item .value { font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; color: var(--text); }
-    .hero-meta-item .label { font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.03em; }
+    .hero-meta-item { display: flex; flex-direction: column; gap: 2px; }
+    .hero-meta-item .value { font-family: var(--font-display); font-size: 0.9rem; font-weight: 600; color: var(--text); }
+    .hero-meta-item .label { font-size: 0.7rem; color: var(--text-muted); letter-spacing: 0.03em; }
 
     /* ============================================================
        STREAM DIVIDER
@@ -699,13 +717,15 @@
        RESPONSIVE
        ============================================================ */
     @media (max-width: 768px) {
-      .hero { min-height: auto; padding: 60px 0; }
-      .hero-meta { gap: 20px; }
+      .hero { min-height: auto; height: auto; padding: 48px 0; }
+      .hero-meta { gap: 16px; margin-top: 16px; padding-top: 14px; }
+      .hero-left { padding: 0; }
       section { padding: 64px 0; }
       .stats-bar { grid-template-columns: repeat(2, 1fr); gap: 16px; }
       .stat-item .stat-value { font-size: 1.5rem; }
     }
   </style>
+
 </head>
 <body>
 
@@ -740,7 +760,7 @@
   <header class="hero">
     <div class="hero-grid"></div>
     <div class="container hero-content">
-      <div>
+      <div class="hero-left">
         <div class="hero-badge">
           <span class="dot"></span>
           actively building &middot; Kampala, Uganda
@@ -776,7 +796,7 @@
         </div>
       </div>
 
-      <div class="hero-visual fade-in visible">
+      <div class="hero-right fade-in visible">
         <img src="scratch/attention_trajectory.png" alt="3D attention trajectory visualization showing banana embedding shifting under different contexts">
         <span class="hero-visual-caption">Attention vectors in 3D space &mdash; one word, two contexts</span>
       </div>
