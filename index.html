@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>the-residual-stream — building at the frontier, in public, from first principles</title>
+  <meta property="og:title" content="the-residual-stream">
+  <meta property="og:description" content="A live record of the gap between understanding something and being able to build it — closing, week by week, in public. JAX from scratch. Kampala, Uganda.">
+  <meta property="og:image" content="https://raw.githubusercontent.com/your-username/the-residual-stream/main/scratch/attention_trajectory.png">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://github.com/your-username/the-residual-stream">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="description" content="Building toward frontier ML research intern level from Kampala. Transformers from scratch in JAX. No shortcuts.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+       RESET + BASE
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:        #0a0a0f;
+      --space:        #0f0c29;
+      --twilight:     #1a1535;
+      --deep:         #24243e;
+      --mid:          #302b63;
+      --purple:       #6366f1;
+      --purple-dim:   #4a46a0;
+      --cyan:         #22d3ee;
+      --amber:        #f59e0b;
+      --green:        #34d399;
+      --pink:         #f472b6;
+      --red:          #ef4444;
+      --surface:      #12111e;
+      --surface-raised:#1a1930;
+      --border:       #2a2848;
+      --text:         #e2e0f0;
+      --text-dim:     #8886a8;
+      --text-muted:   #5d5b7a;
+
+      --font-display: 'JetBrains Mono', monospace;
+      --font-body:    'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+      --max-width:    1200px;
+      --radius:       8px;
+      --nav-height:   56px;
+    }
+
+    html { scroll-behavior: smooth; background: var(--black); }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--space);
+      color: var(--text);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      padding-top: var(--nav-height);
+    }
+
+    a { color: var(--cyan); text-decoration: none; transition: color .2s; }
+    a:hover { color: var(--amber); }
+
+    img { max-width: 100%; display: block; }
+    ::selection { background: var(--purple); color: #fff; }
+
+    /* ============================================================
+       UTILITY
+       ============================================================ */
+    .container { max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+
+    .section-label {
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.5rem, 3.5vw, 2.4rem);
+      font-weight: 600;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+
+    .section-desc {
+      color: var(--text-dim);
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+
+    .section-header {
+      max-width: 640px;
+      margin-bottom: 56px;
+    }
+
+    .section-header.centered { text-align: center; margin-left: auto; margin-right: auto; }
+
+    /* fade-in on scroll */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* ============================================================
+       STICKY NAV
+       ============================================================ */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--nav-height);
+      z-index: 1000;
+      background: rgba(10, 10, 15, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .nav-brand {
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .nav-brand:hover { color: var(--cyan); }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      transition: color .2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-gh-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 0.65rem !important;
+    }
+
+    .nav-gh-link:hover { border-color: var(--text-dim); }
+
+    @media (max-width: 640px) {
+      .nav-links a:not(.nav-gh-link) { display: none; }
+    }
+
+    /* ============================================================
+       NOISE OVERLAY (static)
+       ============================================================ */
+    .noise-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.03;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 256px 256px;
+    }
+
+    /* ============================================================
+       HERO
+       ============================================================ */
+    .hero {
+      position: relative;
+      min-height: calc(100vh - var(--nav-height));
+      display: flex;
+      align-items: center;
+      padding: 80px 0;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(99, 102, 241, 0.12), transparent),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(34, 211, 238, 0.05), transparent),
+        radial-gradient(ellipse 50% 40% at 10% 70%, rgba(245, 158, 11, 0.03), transparent);
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(99, 102, 241, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(99, 102, 241, 0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent 70%);
+      -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent 70%);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+
+    @media (max-width: 860px) {
+      .hero-content { grid-template-columns: 1fr; gap: 40px; }
+      .hero-visual { display: none; }
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 6px 14px 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      color: var(--text-dim);
+      margin-bottom: 28px;
+    }
+
+    .hero-badge .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(52, 211, 153, 0.4); }
+      50% { opacity: 0.5; box-shadow: 0 0 2px rgba(52, 211, 153, 0.1); }
+    }
+
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 5vw, 3.6rem);
+      font-weight: 700;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 .gradient {
+      background: linear-gradient(135deg, #e2e0f0 0%, var(--purple) 50%, var(--cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero h1 .amp { font-style: italic; opacity: 0.7; }
+
+    .hero-sub {
+      font-size: clamp(0.95rem, 1.3vw, 1.1rem);
+      color: var(--text-dim);
+      line-height: 1.7;
+      margin-bottom: 36px;
+    }
+
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 500;
+      padding: 12px 28px;
+      border-radius: var(--radius);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all .25s;
+    }
+
+    .btn-primary { background: var(--purple); color: #fff; border-color: var(--purple); }
+    .btn-primary:hover {
+      background: #5558e6; border-color: #5558e6;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);
+    }
+
+    .btn-outline { background: transparent; color: var(--text); border-color: var(--border); }
+    .btn-outline:hover { border-color: var(--text-dim); background: rgba(255,255,255,0.03); }
+
+    /* Hero visual */
+    .hero-visual {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-visual img {
+      width: 100%;
+      max-width: 460px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+    }
+
+    .hero-visual-caption {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      right: 12px;
+      font-family: var(--font-display);
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 6px 12px;
+      background: rgba(10,10,15,0.7);
+      border-radius: 4px;
+      backdrop-filter: blur(4px);
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 32px;
+      margin-top: 48px;
+      padding-top: 28px;
+      border-top: 1px solid var(--border);
+    }
+
+    .hero-meta-item { display: flex; flex-direction: column; gap: 4px; }
+    .hero-meta-item .value { font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; color: var(--text); }
+    .hero-meta-item .label { font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.03em; }
+
+    /* ============================================================
+       STREAM DIVIDER
+       ============================================================ */
+    .stream-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border) 20%, var(--purple-dim) 50%, var(--border) 80%, transparent);
+    }
+
+    /* ============================================================
+       SECTIONS (shared)
+       ============================================================ */
+    section { padding: 100px 0; }
+    section.alt { background: var(--surface); }
+
+    /* ============================================================
+       NARRATIVE HOOK
+       ============================================================ */
+    .hook-block {
+      max-width: 720px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .hook-block .location {
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .hook-block blockquote {
+      font-family: var(--font-display);
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      font-weight: 400;
+      line-height: 1.7;
+      color: var(--text-dim);
+      padding: 32px 40px;
+      border-left: 2px solid var(--purple-dim);
+      background: var(--surface-raised);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      text-align: left;
+    }
+
+    .hook-block blockquote strong { color: var(--text); font-weight: 600; }
+
+    /* ============================================================
+       STATS BAR
+       ============================================================ */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 24px;
+      padding: 40px 0;
+    }
+
+    .stat-item { text-align: center; }
+
+    .stat-item .stat-value {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1.1;
+      color: var(--text);
+    }
+
+    .stat-item .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      margin-top: 4px;
+    }
+
+    /* ============================================================
+       PRINCIPLES
+       ============================================================ */
+    .principles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+    }
+
+    .principle-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      transition: border-color .25s;
+    }
+
+    .principle-card:hover { border-color: var(--purple-dim); }
+
+    .principle-card .icon {
+      font-size: 1.4rem;
+      margin-bottom: 16px;
+      display: block;
+      color: var(--purple);
+    }
+
+    .principle-card h3 {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      margin-bottom: 10px;
+    }
+
+    .principle-card p { font-size: 0.85rem; color: var(--text-dim); line-height: 1.65; }
+
+    /* ============================================================
+       ROADMAP
+       ============================================================ */
+    .roadmap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+    .roadmap-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+    }
+
+    .roadmap-card h3 {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      margin-bottom: 18px;
+      color: var(--cyan);
+    }
+
+    .roadmap-card ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .roadmap-card ul li {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      padding-left: 20px;
+      position: relative;
+      line-height: 1.5;
+    }
+
+    .roadmap-card ul li::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 9px;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      border: 1.5px solid var(--text-muted);
+    }
+
+    .roadmap-card ul li.done::before { background: var(--green); border-color: var(--green); }
+
+    .roadmap-card ul li.active::before {
+      background: var(--amber); border-color: var(--amber);
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+    }
+
+    @media (max-width: 700px) { .roadmap-grid { grid-template-columns: 1fr; } }
+
+    /* ============================================================
+       DIRECTORY TREE
+       ============================================================ */
+    .tree-wrapper {
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      overflow-x: auto;
+    }
+
+    .tree-wrapper pre {
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      line-height: 1.85;
+      color: var(--text-dim);
+    }
+
+    .tree-wrapper pre .hl-folder  { color: var(--cyan); }
+    .tree-wrapper pre .hl-desc   { color: var(--text-muted); }
+    .tree-wrapper pre .hl-accent { color: var(--purple); }
+
+    /* ============================================================
+       PAPERS SHOWCASE
+       ============================================================ */
+    .papers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .paper-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: border-color .25s;
+    }
+
+    .paper-card:hover { border-color: var(--purple-dim); }
+
+    .paper-card .paper-year {
+      font-family: var(--font-display);
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--purple);
+    }
+
+    .paper-card h3 {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    .paper-card .paper-authors {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+
+    .paper-card .paper-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: auto;
+    }
+
+    .paper-card .paper-tags .tag {
+      display: inline-block;
+      font-family: var(--font-display);
+      font-size: 0.6rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    .paper-card .paper-link {
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      color: var(--cyan);
+      align-self: flex-start;
+    }
+
+    .paper-card .paper-link:hover { color: var(--amber); }
+
+    /* ============================================================
+       STREAM / CURRENT FOCUS
+       ============================================================ */
+    .stream-box {
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 36px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 40px;
+      align-items: flex-start;
+    }
+
+    .stream-label {
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .stream-box h3 { font-family: var(--font-display); font-size: 1.2rem; font-weight: 600; margin-bottom: 4px; }
+
+    .stream-box .stream-status {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--font-display); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--amber); padding: 4px 12px; border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 100px; margin-bottom: 24px;
+    }
+
+    .stream-box .stream-status .pulse {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--amber);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    .stream-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex: 1; min-width: 260px; }
+    @media (max-width: 600px) { .stream-grid { grid-template-columns: 1fr; } }
+
+    .stream-item { display: flex; flex-direction: column; gap: 4px; }
+    .stream-item .s-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); }
+    .stream-item .s-value { font-family: var(--font-display); font-size: 0.8rem; color: var(--text); }
+    .stream-item .s-value a { color: var(--cyan); }
+    .stream-item .s-value a:hover { color: var(--amber); }
+
+    /* ============================================================
+       FOOTER
+       ============================================================ */
+    footer { border-top: 1px solid var(--border); padding: 48px 0; }
+
+    .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 40px; }
+    @media (max-width: 700px) { .footer-grid { grid-template-columns: 1fr; gap: 24px; } }
+
+    .footer-brand { font-family: var(--font-display); font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; }
+    .footer-desc { font-size: 0.8rem; color: var(--text-dim); line-height: 1.7; max-width: 340px; }
+
+    .footer-col h4 {
+      font-family: var(--font-display); font-size: 0.7rem; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: 16px;
+    }
+
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .footer-col ul li a { font-size: 0.8rem; color: var(--text-dim); }
+
+    .footer-bottom {
+      margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--border);
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+      gap: 16px; font-size: 0.75rem; color: var(--text-muted);
+    }
+    @media (max-width: 700px) { .footer-bottom { flex-direction: column; text-align: center; } }
+
+    .footer-location { display: flex; align-items: center; gap: 6px; }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+    @media (max-width: 768px) {
+      .hero { min-height: auto; padding: 60px 0; }
+      .hero-meta { gap: 20px; }
+      section { padding: 64px 0; }
+      .stats-bar { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+      .stat-item .stat-value { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================================
+       STATIC NOISE OVERLAY
+       ========================================================== -->
+  <div class="noise-overlay"></div>
+
+  <!-- ==========================================================
+       STICKY NAV
+       ========================================================== -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="#" class="nav-brand">~residual-stream</a>
+      <ul class="nav-links">
+        <li><a href="#about">About</a></li>
+        <li><a href="#structure">Map</a></li>
+        <li><a href="#roadmap">Arc</a></li>
+        <li><a href="#papers">Papers</a></li>
+        <li><a href="#current">Stream</a></li>
+        <li><a href="https://github.com/your-username/the-residual-stream" target="_blank" class="nav-gh-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          GitHub
+        </a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ==========================================================
+       HERO
+       ========================================================== -->
+  <header class="hero">
+    <div class="hero-grid"></div>
+    <div class="container hero-content">
+      <div>
+        <div class="hero-badge">
+          <span class="dot"></span>
+          actively building &middot; Kampala, Uganda
+        </div>
+
+        <h1>
+          <span class="gradient">the residual stream</span><br>
+          building at the frontier,<br>
+          in public, <span class="amp">&</span> from<br>
+          first principles
+        </h1>
+
+        <p class="hero-sub">
+          A live record of the gap between understanding something and being able to build it&mdash;closing, week by week, in public. No tutorials. No shortcuts. Just a blank file, the Chinchilla paper, and a question that won't leave.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#structure" class="btn btn-primary">
+            Explore the repo
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 7h10M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <a href="https://github.com/your-username/the-residual-stream" class="btn btn-outline" target="_blank">
+            GitHub
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
+
+        <div class="hero-meta">
+          <div class="hero-meta-item"><span class="value">JAX</span><span class="label">stack &middot; from scratch</span></div>
+          <div class="hero-meta-item"><span class="value">8-week arc</span><span class="label">foundations &rarr; frontier</span></div>
+          <div class="hero-meta-item"><span class="value">Kampala</span><span class="label">building from East Africa</span></div>
+          <div class="hero-meta-item"><span class="value">~daily</span><span class="label">commits, public since day one</span></div>
+        </div>
+      </div>
+
+      <div class="hero-visual fade-in visible">
+        <img src="scratch/attention_trajectory.png" alt="3D attention trajectory visualization showing banana embedding shifting under different contexts">
+        <span class="hero-visual-caption">Attention vectors in 3D space &mdash; one word, two contexts</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="stream-divider"></div>
+
+  <!-- ==========================================================
+       NARRATIVE HOOK + STATS
+       ========================================================== -->
+  <section id="about">
+    <div class="container">
+      <div class="hook-block fade-in">
+        <p class="location">Kampala, Uganda &middot; 11 PM</p>
+        <blockquote>
+          A student opens a terminal. No Jupyter tutorial. No course to follow. Just a blank <strong>.py</strong> file, the Chinchilla paper, and a question that won't leave them alone:<br><br>
+          <em>&ldquo;I understand how transformers work. But can I actually build one&mdash;from the matrix multiply up&mdash;that trains, that converges, that I can debug when it breaks?&rdquo;</em><br><br>
+          That's what this repo is. Not a collection of finished projects. A <strong>live record</strong> of the gap between understanding something and being able to build it&mdash;closing, week by week, in public.
+        </blockquote>
+      </div>
+
+      <div class="stats-bar fade-in">
+        <div class="stat-item"><span class="stat-value">4</span><span class="stat-label">implementations started</span></div>
+        <div class="stat-item"><span class="stat-value">7</span><span class="stat-label">Python notebooks</span></div>
+        <div class="stat-item"><span class="stat-value">3</span><span class="stat-label">research papers read</span></div>
+        <div class="stat-item"><span class="stat-value">1</span><span class="stat-label">experiment completed</span></div>
+        <div class="stat-item"><span class="stat-value">1</span><span class="stat-label">active week</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="stream-divider"></div>
+
+  <!-- ==========================================================
+       PRINCIPLES
+       ========================================================== -->
+  <section id="principles" class="alt">
+    <div class="container">
+      <div class="section-header fade-in">
+        <p class="section-label">The Principles</p>
+        <h2 class="section-title">How this thing works</h2>
+        <p class="section-desc">Not a tutorial collection. A build journal with a point of view. These four rules keep it honest.</p>
+      </div>
+
+      <div class="principles-grid">
+        <div class="principle-card fade-in">
+          <span class="icon">&#9650;</span>
+          <h3>Build before you explain</h3>
+          <p>Every folder in <code>implementations/</code> started as a blank file, not a copy of someone else's code. The point is not the output&mdash;it's the hour where nothing works and you have to figure out why.</p>
+        </div>
+        <div class="principle-card fade-in">
+          <span class="icon">&#9661;</span>
+          <h3>State the hypothesis first</h3>
+          <p>Every experiment has a README written before the notebook. What am I expecting? Why? What would change my mind? This is what research actually is&mdash;not running code, but framing the question.</p>
+        </div>
+        <div class="principle-card fade-in">
+          <span class="icon">&#9671;</span>
+          <h3>Commit the confusion</h3>
+          <p>A portfolio that only shows polished work is a highlight reel. The learning log tracks what I don't understand yet&mdash;because the real signal is in what broke.</p>
+        </div>
+        <div class="principle-card fade-in">
+          <span class="icon">&#9675;</span>
+          <h3>Read the source, not the summary</h3>
+          <p>Every paper in <code>paper_notes/</code> was read in full&mdash;abstract, methods, experiments, limitations. Blog posts are for after. The primary literature is the minimum bar.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="stream-divider"></div>
+
+  <!-- ==========================================================
+       DIRECTORY STRUCTURE
+       ========================================================== -->
+  <section id="structure">
+    <div class="container">
+      <div class="section-header fade-in">
+        <p class="section-label">The Map</p>
+        <h2 class="section-title">What's being built</h2>
+        <p class="section-desc">Seven directories, one pipeline. Each folder has a job, and no two folders do the same job.</p>
+      </div>
+
+      <div class="tree-wrapper fade-in">
+        <pre>
+<span class="hl-folder">the-residual-stream/</span>
+│
+├── <span class="hl-folder">foundations/</span>          <span class="hl-desc">Mathematical bedrock. SVD, backprop by hand, KL divergence.</span>
+│   ├── <span class="hl-folder">linear_algebra/</span>
+│   ├── <span class="hl-folder">calculus/</span>
+│   ├── <span class="hl-folder">probability/</span>
+│   └── <span class="hl-folder">ml_prerequisites/</span>   <span class="hl-desc">Runnable notebooks: ML prerequisites from scratch</span>
+│
+├── <span class="hl-folder">implementations/</span>      <span class="hl-desc">Papers &rarr; running code. JAX only. No shortcuts.</span>
+│   ├── <span class="hl-folder">01_bpe_tokenizer/</span>   <span class="hl-desc">Byte Pair Encoding from the 1994 paper</span>
+│   ├── <span class="hl-folder">02_transformer/</span>     <span class="hl-desc">Attention Is All You Need (in progress)</span>
+│   ├── <span class="hl-folder">03_training_loop/</span>   <span class="hl-desc">Forward pass &rarr; loss &rarr; backprop &rarr; Adam</span>
+│   ├── <span class="hl-folder">04_lora/</span>            <span class="hl-desc">Low-rank adaptation from Hu et al. 2021 (planned)</span>
+│   └── <span class="hl-folder">05_scaling_laws/</span>    <span class="hl-desc">Chinchilla scaling laws (planned)</span>
+│
+├── <span class="hl-folder">experiments/</span>          <span class="hl-desc">Hypothesis &rarr; result &rarr; write-up.</span>
+│   ├── <span class="hl-folder">01_tokenization_tax/</span> <span class="hl-desc">Does Luganda really cost 3&times; more tokens?</span>
+│   └── <span class="hl-folder">02_warmup_ablation/</span> <span class="hl-desc">How bad is training without LR warmup? (planned)</span>
+│
+├── <span class="hl-folder">paper_notes/</span>          <span class="hl-desc">Structured notes on every paper read</span>
+├── <span class="hl-folder">weekly_builds/</span>        <span class="hl-desc">One complete, working thing per week</span>
+├── <span class="hl-folder">lectures_exercises/</span>  <span class="hl-desc">MIT CSAIL masterclass materials</span>
+├── <span class="hl-folder">research_papers/</span>     <span class="hl-desc">Raw PDFs and primary reading</span>
+└── <span class="hl-folder">scratch/</span>             <span class="hl-desc">Throwaway scripts and one-off explorations</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <div class="stream-divider"></div>
+
+  <!-- ==========================================================
+       8-WEEK ARC
+       ========================================================== -->
+  <section id="roadmap" class="alt">
+    <div class="container">
+      <div class="section-header fade-in">
+        <p class="section-label">The 8-Week Arc</p>
+        <h2 class="section-title">From blank file to frontier lab readiness</h2>
+        <p class="section-desc">A structured but flexible arc. Every week has a target. Some weeks you build. Some weeks you read. Some weeks things break and you learn more than the weeks they worked.</p>
+      </div>
+
+      <div class="roadmap-grid">
+        <div class="roadmap-card fade-in">
+          <h3>Weeks 1&ndash;2 &mdash; Foundations</h3>
+          <ul>
+            <li class="active">Backpropagation by hand (scalar &rarr; vector &rarr; matrix)</li>
+            <li class="active">BPE tokenizer from scratch in JAX</li>
+            <li>Cross-entropy loss, stable log-softmax</li>
+            <li>Adam optimizer: implement the paper exactly</li>
+            <li>nanoGPT re-implemented alone, no looking</li>
+          </ul>
+        </div>
+        <div class="roadmap-card fade-in">
+          <h3>Weeks 3&ndash;4 &mdash; Read the Canon</h3>
+          <ul>
+            <li><em>Attention Is All You Need</em> &mdash; Vaswani et al.</li>
+            <li><em>GPT-3: Language Models are Few-Shot Learners</em></li>
+            <li><em>Chinchilla</em> &mdash; Hoffmann et al. 2022</li>
+            <li><em>LoRA</em> &mdash; Hu et al. 2021</li>
+            <li><em>Constitutional AI</em> &mdash; Anthropic 2022</li>
+          </ul>
+        </div>
+        <div class="roadmap-card fade-in">
+          <h3>Weeks 5&ndash;6 &mdash; Original Experiments</h3>
+          <ul>
+            <li>Tokenization tax: English vs Luganda (hypothesis first)</li>
+            <li>Warmup ablation study on a training run</li>
+            <li>Reproduce a result from a paper, then extend it</li>
+            <li>Write up findings in experiment READMEs</li>
+          </ul>
+        </div>
+        <div class="roadmap-card fade-in">
+          <h3>Weeks 7&ndash;8 &mdash; Push the Frontier</h3>
+          <ul>
+            <li>LoRA implementation on a small LM</li>
+            <li>Something I haven't decided yet (following curiosity)</li>
+            <li>Clean every README, every notebook</li>
+            <li>Write the full retrospective</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="stream-divider"></div>
+
+  <!-- ==========================================================
+       PAPERS SHOWCASE
+       ========================================================== -->
+  <section id="papers">
+    <div class="container">
+      <div class="section-header fade-in">
+        <p class="section-label">The Reading List</p>
+        <h2 class="section-title">Papers that shaped this build</h2>
+        <p class="section-desc">Every paper read in full&mdash;abstract through limitations. Blog posts are for after. The primary literature is the minimum bar.</p>
+      </div>
+
+      <div class="papers-grid">
+        <div class="paper-card fade-in">
+          <span class="paper-year">2017</span>
+          <h3>Attention Is All You Need</h3>
+          <p class="paper-authors">Vaswani et al.</p>
+          <div class="paper-tags">
+            <span class="tag">transformer</span>
+            <span class="tag">attention</span>
+            <span class="tag">sequence-to-sequence</span>
+          </div>
+          <a class="paper-link" href="research_papers/Attention%20is%20All%20You%20Need%20-%20Vaswani%20et%20Al%20-%202017.pdf" target="_blank">
+            Read PDF &rarr;
+          </a>
+        </div>
+        <div class="paper-card fade-in">
+          <span class="paper-year">2014</span>
+          <h3>Adam: A Method for Stochastic Optimization</h3>
+          <p class="paper-authors">Kingma &amp; Ba</p>
+          <div class="paper-tags">
+            <span class="tag">optimization</span>
+            <span class="tag">training</span>
+          </div>
+          <a class="paper-link" href="research_papers/ADAM%20-%20A%20METHOD%20FOR%20STOCHASTIC%20OPTIMIZATION.pdf" target="_blank">
+            Read PDF &rarr;
+          </a>
+        </div>
+        <div class="paper-card fade-in">
+          <span class="paper-year">2022</span>
+          <h3>Training Compute-Optimal Large Language Models</h3>
+          <p class="paper-authors">Hoffmann et al. &mdash; DeepMind</p>
+          <div class="paper-tags">
+            <span class="tag">scaling laws</span>
+            <span class="tag">chinchilla</span>
+            <span class="tag">compute-optimal</span>
+          </div>
+          <a class="paper-link" href="research_papers/DeepMind%20-%20Training%20Compute-Optimal%20Large%20Language%20Models.pdf" target="_blank">
+            Read PDF &rarr;
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="stream-divider"></div>
+
+  <!-- ==========================================================
+       CURRENT STREAM
+       ========================================================== -->
+  <section id="current" class="alt">
+    <div class="container">
+      <div class="section-header fade-in">
+        <p class="section-label">Currently in the Stream</p>
+        <h2 class="section-title">Live status</h2>
+        <p class="section-desc">What's being built right now, what's being read, and what's blocking progress. Updated every week.</p>
+      </div>
+
+      <div class="stream-box fade-in">
+        <div style="min-width: 160px;">
+          <div class="stream-label">Week 1</div>
+          <h3>Active</h3>
+          <div class="stream-status">
+            <span class="pulse"></span>
+            in progress
+          </div>
+        </div>
+        <div class="stream-grid">
+          <div class="stream-item">
+            <span class="s-label">Building</span>
+            <span class="s-value">BPE tokenizer + full training loop in JAX</span>
+          </div>
+          <div class="stream-item">
+            <span class="s-label">Reading</span>
+            <span class="s-value"><a href="research_papers/Attention%20is%20All%20You%20Need%20-%20Vaswani%20et%20Al%20-%202017.pdf" target="_blank">Vaswani et al. 2017</a></span>
+          </div>
+          <div class="stream-item">
+            <span class="s-label">Blocked on</span>
+            <span class="s-value">causal masking shape in multi-head attention</span>
+          </div>
+          <div class="stream-item">
+            <span class="s-label">Resolved</span>
+            <span class="s-value" style="color: var(--text-dim);">in progress</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="stream-divider"></div>
+
+  <!-- ==========================================================
+       FOOTER
+       ========================================================== -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">the-residual-stream</div>
+          <p class="footer-desc">
+            Building toward frontier ML research intern level from Kampala, Uganda. Every weight update logged publicly. No shortcuts.
+          </p>
+        </div>
+        <div class="footer-col">
+          <h4>Explore</h4>
+          <ul>
+            <li><a href="#about">About</a></li>
+            <li><a href="#structure">Structure</a></li>
+            <li><a href="#roadmap">Roadmap</a></li>
+            <li><a href="#papers">Papers</a></li>
+            <li><a href="#current">Current Stream</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Connect</h4>
+          <ul>
+            <li><a href="https://github.com/your-username/the-residual-stream" target="_blank">GitHub</a></li>
+            <li><a href="#">Email</a></li>
+            <li><a href="#">Twitter</a></li>
+            <li><a href="#">LinkedIn</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span class="footer-location">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Kampala, Uganda
+        </span>
+        <span>Started June 2026 &middot; Inspired by Prof. Whitmore's MIT CSAIL Masterclass</span>
+        <span><a href="https://bwat.getcasaapp.com" target="_blank" style="color: var(--text-muted);">Built with Bwat</a></span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==========================================================
+       SCROLL ANIMATIONS
+       ========================================================== -->
+  <script>
+    (function() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+      document.querySelectorAll('.fade-in').forEach(el => {
+        observer.observe(el);
+      });
+    })();
+  </script>
+
+</body>
+</html>
