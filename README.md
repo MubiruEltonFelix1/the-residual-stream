@@ -48,42 +48,93 @@ This is the residual stream. Every week, the weights update.
 ```
 the-residual-stream/
 │
-├── lectures_exercises/       Lecture notes and JAX challenge work
-│   ├── lectures/             Course lecture material
-│   └── exercises/            Notebook-based practice and challenges
-│
-├── research_papers/          Paper PDFs and primary reading material
-│
-├── 🧮  foundations/          Mathematical bedrock. No ML yet.
-│   ├── linear_algebra/       SVD, eigendecomposition, projections
-│   ├── calculus/             Jacobians, backprop by hand, chain rule
-│   └── probability/          KL divergence, MLE, Bayesian reasoning
+├── 🧮  foundations/          Mathematical bedrock. Working code, not just theory.
+│   ├── linear_algebra/       Vectors, matrices, projections, SVD
+│   ├── calculus/             Derivatives, Jacobians, backprop by hand
+│   ├── probability/          Distributions, KL divergence, Bayesian reasoning
+│   └── ml_prerequisites/     ML prerequisites with runnable notebooks
 │
 ├── ⚙️  implementations/      Papers → running code. JAX only. No shortcuts.
 │   ├── 01_bpe_tokenizer/     Byte Pair Encoding from the 1994 paper
-│   ├── 02_transformer/       Attention Is All You Need, implemented
+│   ├── 02_transformer/       Attention Is All You Need (in progress)
 │   ├── 03_training_loop/     Forward pass → loss → backprop → Adam
-│   ├── 04_lora/              Low-rank adaptation from Hu et al. 2021
-│   └── 05_chinchilla_laws/   The scaling calculator that broke GPT-3
-│
-├── 📄  paper_notes/          Structured notes on every paper read
+│   ├── 04_lora/              Low-rank adaptation from Hu et al. 2021 (planned)
+│   └── 05_scaling_laws/      Chinchilla scaling laws (planned)
 │
 ├── 🔬  experiments/          Original questions. Stated hypotheses. Real results.
 │   ├── 01_tokenization_tax/  Does Luganda really cost 3× more tokens?
-│   └── 02_warmup_ablation/   How bad is training without LR warmup?
+│   └── 02_warmup_ablation/   How bad is training without LR warmup? (planned)
 │
+├── 📄  paper_notes/          Structured notes on every paper read
 ├── 📓  weekly_builds/        One complete, working thing per week
-
-└── 📋  LEARNING_LOG.md       Honest weekly updates. What broke. What I don't know yet.
+├── 📖  lectures_exercises/   Lecture notes and JAX challenge work
+│   ├── lectures/             Course lecture material
+│   └── exercises/            Notebook-based practice and challenges
+│
+├── 📁  research_papers/      Paper PDFs and primary reading material
+└── 📦  scratch/              Throwaway scripts, one-off explorations, orphaned experiments
 ```
 
 ---
 
-<div align="center">
+## Directory Guide — What Lives Where
+
+The tree above tells you what's in each folder. This section tells you *why* a thing lives in one folder instead of another. The pairs that sound similar are not redundant — they serve different stages of the same pipeline.
+
+---
+
+### foundations vs implementations vs experiments
+
+The three folders that form the core workflow:
+
+| Stage | Question it answers | Example content | When to look here |
+|---|---|---|---|
+| **foundations/** | *Do I understand the math?* | Backpropagation by hand, SVD, Jacobian derivations | Before you write any code. If a later implementation breaks and you suspect the math, come back here. |
+| **implementations/** | *Can I build it from the paper?* | BPE tokenizer, transformer blocks, training loop | When you're coding. Each subfolder is one paper turned into runnable JAX code. |
+| **experiments/** | *What happens if I change this?* | Tokenization tax across languages, warmup ablation study | After the implementation works. State a hypothesis, run it, write up what you found — including negative results. |
+
+**The pipeline:** You learn the math in `foundations/`. You build the thing in `implementations/`. You push on it and break it in `experiments/`. A notebook that derives backprop belongs in `foundations/`. A notebook that trains a BPE tokenizer belongs in `implementations/`. A notebook that measures how many tokens Luganda needs compared to English belongs in `experiments/` — it starts with a hypothesis, not a tutorial.
+
+If something could go in two places, ask: *am I learning the tool or am I testing a question?* Learning → `implementations/`. Testing → `experiments/`.
+
+---
+
+### paper_notes vs research_papers
+
+| Folder | What it holds | Why separate |
+|---|---|---|
+| **research_papers/** | The raw PDFs. The source documents. | This is your reference library. You download a PDF and it lives here, unchanged, so you can always find the original. |
+| **paper_notes/** | Your own structured notes on what you read. | This is what you extracted from the PDF. The one-sentence claim, the key experiment, what confused you, what you'd test next. |
+
+The rule: `research_papers/` is the text as written by the authors. `paper_notes/` is the text as understood by you. You should be able to throw away the PDF and rebuild the implementation from your notes. If you can't, the note isn't complete.
+
+---
+
+### scratch vs weekly_builds
+
+| Folder | When something goes here | What it is |
+|---|---|---|
+| **scratch/** | You wrote a one-off script to test an idea, probe an API, or visualize something. You're not sure it'll be useful again. | Throwaway explorations. Quick plots, debug scripts, tangled notebooks. No commitment to polish or document. |
+| **weekly_builds/** | You finished a coherent piece of work — an implementation that runs, an experiment that returned results, a milestone reached. | Polished weekly summaries. One folder per week with a README explaining what was built, what broke, and what you learned. |
+
+Think of `scratch/` as a workbench — things get built, torn apart, and sometimes thrown away. `weekly_builds/` is a gallery — only finished (or honestly failed) work that tells a story. If you're wondering whether a file is `scratch/` or `weekly_builds/` material, ask: *would I want to show this to someone as a record of progress?* Yes → `weekly_builds/`. No → `scratch/`.
+
+---
+
+### lectures_exercises
+
+This folder holds outside course material — lecture slides, notes, and challenge exercises that come from a structured program (in this case, an MIT CSAIL masterclass series). It differs from the other folders:
+
+- **It is not original work.** The `.docx` files and the JAX challenge notebook were given or assigned; this folder stores them for reference.
+- **It is not organized by topic.** Unlike `foundations/` or `implementations/`, the content here follows the external course schedule, not the repo's internal learning arc.
+- **It exists as a supplement.** If a lecture covers something you later implement, the connection should flow through your own code in `implementations/`, not through the lecture slide.
+
+In short: `lectures_exercises/` is what someone else taught you. Everything else in this repo is what you built from it.
+
+---
 
 ## The 8-Week Arc
 
-</div>
 
 <table>
 <tr>
@@ -169,7 +220,7 @@ Every paper in `paper_notes/` was read in full — abstract, methods, experiment
 └─────────────────────────────────────────────────────────┘
 ```
 
-> Full weekly updates in [`LEARNING_LOG.md`](./LEARNING_LOG.md)
+> Full weekly updates logged in [`weekly_builds/`](./weekly_builds/)
 
 </div>
 
